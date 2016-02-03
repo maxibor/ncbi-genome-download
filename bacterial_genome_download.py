@@ -1,7 +1,6 @@
 import csv
 import sys
 import os
-# name_list = open("genomes.txt" , "r")
 try :
     with open(sys.argv[1],"r") as name_list :
         with open("assembly_summary_refseq.txt", "r") as genome_list_file :
