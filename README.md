@@ -10,7 +10,7 @@
  
  *Example :*
  
-	```
+```
 Escherichia coli
 Mycobacterium tuberculosis
 ```
