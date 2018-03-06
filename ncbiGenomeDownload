@@ -15,12 +15,18 @@ def _get_args():
     dest="refseq",
     default= "assembly_summary_refseq.txt",
     help="path to assembly_summary_refseq.txt")
+    parser.add_argument(
+    '-o',
+    dest="outpath",
+    default= ".",
+    help="path to existing output directory")
     args = parser.parse_args()
 
     species = args.specie_list
     refseq = args.refseq
+    outpath = args.outpath
 
-    return(species, refseq)
+    return(species, refseq, outpath)
 
 def get_filename(url):
     file_name = url.split("/")[-1]+"_genomic.fna.gz"
@@ -28,7 +34,7 @@ def get_filename(url):
     return(res, file_name)
 
 if __name__ == "__main__":
-    SPECIES, REFSEQ = _get_args()
+    SPECIES, REFSEQ, OUTPATH = _get_args()
 
     with open(SPECIES,"r") as specie_list :
         for specie in specie_list:
@@ -49,5 +55,7 @@ if __name__ == "__main__":
                         cmd = "mv "+download_url[1]+" "+specie.replace(" ","_")+"_genomic.fna.gz"
                         os.system(cmd)
                         cmd = "gunzip "+specie.replace(" ","_")+"_genomic.fna.gz"
+                        os.system(cmd)
+                        cmd = "mv "+specie.replace(" ","_")+"_genomic.fna "+OUTPATH+"/"+specie.replace(" ","_")+"_genome.fa"
                         os.system(cmd)
                         break
