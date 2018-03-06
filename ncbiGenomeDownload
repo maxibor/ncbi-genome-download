@@ -1,0 +1,53 @@
+#!/usr/bin/env python
+
+
+import os
+import argparse
+
+def _get_args():
+    '''This function parses and return arguments passed in'''
+    parser = argparse.ArgumentParser(
+    prog='ncbiGenomeDownload',
+    description='Download genomes from NCBI REFSEQ')
+    parser.add_argument('specie_list', help="path to specie list file. One specie per line")
+    parser.add_argument(
+    '-r',
+    dest="refseq",
+    default= "assembly_summary_refseq.txt",
+    help="path to assembly_summary_refseq.txt")
+    args = parser.parse_args()
+
+    species = args.specie_list
+    refseq = args.refseq
+
+    return(species, refseq)
+
+def get_filename(url):
+    file_name = url.split("/")[-1]+"_genomic.fna.gz"
+    res = url+"/"+file_name
+    return(res, file_name)
+
+if __name__ == "__main__":
+    SPECIES, REFSEQ = _get_args()
+
+    with open(SPECIES,"r") as specie_list :
+        for specie in specie_list:
+            specie = specie.rstrip()
+            with open(REFSEQ, "r") as genome_list :
+                for _ in range(2):
+                    next(genome_list)
+                for genome_line in genome_list:
+                    genome = genome_line.split("\t")
+                    genome_name = genome[7]
+                    # print(genome_name)
+                    genome_url = genome[19]
+                    if genome_name == specie:
+                        download_url = get_filename(genome_url)
+                        print("Downloading ", specie, " from ", download_url[0])
+                        cmd = "wget "+download_url[0]
+                        os.system(cmd)
+                        cmd = "mv "+download_url[1]+" "+specie.replace(" ","_")+"_genomic.fna.gz"
+                        os.system(cmd)
+                        cmd = "gunzip "+specie.replace(" ","_")+"_genomic.fna.gz"
+                        os.system(cmd)
+                        break
