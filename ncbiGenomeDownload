@@ -45,6 +45,7 @@ if __name__ == "__main__":
                 for genome_line in genome_list:
                     genome = genome_line.split("\t")
                     genome_name = genome[7]
+                    taxid = str(genome[5])
                     # print(genome_name)
                     genome_url = genome[19]
                     if genome_name == specie:
@@ -56,6 +57,6 @@ if __name__ == "__main__":
                         os.system(cmd)
                         cmd = "gunzip "+specie.replace(" ","_")+"_genomic.fna.gz"
                         os.system(cmd)
-                        cmd = "mv "+specie.replace(" ","_")+"_genomic.fna "+OUTPATH+"/"+specie.replace(" ","_")+"_genome.fa"
+                        cmd = "mv "+specie.replace(" ","_")+"_genomic.fna "+OUTPATH+"/"+specie.replace(" ","_")+"_"+taxid+".fa"
                         os.system(cmd)
                         break
