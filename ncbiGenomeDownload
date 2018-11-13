@@ -69,3 +69,4 @@ if __name__ == "__main__":
                             OUTPATH+"/" + \
                             specie.replace(" ", "_")+"_"+taxid+".fa"
                         os.system(cmd)
+                        break
