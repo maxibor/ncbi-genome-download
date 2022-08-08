@@ -30,5 +30,6 @@ setup(
     install_requires=[
         "tqdm",
     ],
+    packages=find_packages(exclude=["test"]),
     entry_points={"console_scripts": ["ncbi-genome-download = ncbigenomedownload.cli:cli"]}
 )
