@@ -12,7 +12,7 @@ import time
 import random
 
 
-__version__ = "0.1"
+__version__ = "0.2"
 
 def download_file(entry, outdir):
     os.makedirs(outdir, exist_ok=True)
