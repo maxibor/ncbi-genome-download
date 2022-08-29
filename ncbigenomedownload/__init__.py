@@ -54,7 +54,7 @@ def parse_refseq_summary(rs_ass_sum):
                 rs_dict[row['species_taxid']].append(row)
     return rs_dict
 
-def get_genome_url(taxid, rs_dict):
+def get_genome_url(taxid, rs_dict, mode, n):
     '''This function returns a list of urls to download
     '''
     try:
@@ -65,21 +65,34 @@ def get_genome_url(taxid, rs_dict):
     if len(entries) == 1:
         ftp_root_path = entries[0]['ftp_path']
         ftp_path = os.path.join(ftp_root_path, f"{Path(ftp_root_path).name}_genomic.fna.gz")
-        return tuple([
+        return [tuple([
             entries[0]['organism_name'].lower().replace(" ","_"), 
             taxid,
             ftp_path
-        ])
+        ])]
     else:
+        rep_ret = []
+        ret = []
         for entry in entries:
             if entry['refseq_category'] == "representative genome":
                 ftp_root_path = entry['ftp_path']
                 ftp_path = os.path.join(ftp_root_path, f"{Path(ftp_root_path).name}_genomic.fna.gz")
-                return tuple([
+                rep_ret = [tuple([
                     entry['organism_name'].lower().replace(" ","_"), 
                     taxid,
                     ftp_path
-                ])
+                ])]
+            elif mode in ['n', 'all']:
+                ftp_root_path = entry['ftp_path']
+                ftp_path = os.path.join(ftp_root_path, f"{Path(ftp_root_path).name}_genomic.fna.gz")
+                ret.append(
+                    entry['organism_name'].lower().replace(" ","_"), 
+                    taxid,
+                    ftp_path
+                )
+        if mode == 'n' and n and n <= len(ftp_path):
+            ret = random.sample(ret, n-1)
+        return rep_ret + ret
 
 
 def get_genome_urls(rs_dict, taxids):
@@ -87,9 +100,10 @@ def get_genome_urls(rs_dict, taxids):
     '''
     get_genome_url_partial = partial(get_genome_url, rs_dict = rs_dict)
     urls = thread_map(get_genome_url_partial, taxids)
+    urls = [entry for taxid in urls for entry in taxid]
     return urls
 
-def main(refseq_summary_file, taxid_list_file , outdir):
+def main(refseq_summary_file, taxid_list_file, how, nb, outdir):
     rss = parse_refseq_summary(refseq_summary_file)
     taxids = parse_species_taxid_list(taxid_list_file)
     entries = get_genome_urls(rss, taxids)

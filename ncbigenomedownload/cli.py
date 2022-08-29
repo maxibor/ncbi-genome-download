@@ -9,6 +9,19 @@ def _get_args():
     parser.add_argument(
         'species_taxid_list', help="path to species taxid list file. One species taxid per line")
     parser.add_argument(
+        '-h',
+        dest='how',
+        choices=['representative', 'n', 'all'],
+        default="representative",
+        description="How to retrieve reference genones. Only representative, N randonly subsampled genones, or all"
+    )
+    parser.add_argument(
+        '-n',
+        dest='n',
+        default=None,
+        description='Number of genomes to download if -h n'
+    )
+    parser.add_argument(
         '-r',
         dest="refseq",
         default="assembly_summary_refseq.txt",
@@ -25,11 +38,13 @@ def _get_args():
 
     taxids = args.species_taxid_list
     refseq = args.refseq
+    how = args.how
+    nb = args.n
     outpath = args.outpath
 
-    return(taxids, refseq, outpath) 
+    return(taxids, refseq, how, nb, outpath) 
 
 
 def cli():
-    TAXIDS, REFSEQ, OUTPATH = _get_args()
-    main(REFSEQ, TAXIDS, OUTPATH)
+    TAXIDS, REFSEQ, HOW, NB, OUTPATH = _get_args()
+    main(REFSEQ, TAXIDS, HOW, NB, OUTPATH)
