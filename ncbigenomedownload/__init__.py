@@ -54,7 +54,7 @@ def parse_refseq_summary(rs_ass_sum):
                 rs_dict[row['species_taxid']].append(row)
     return rs_dict
 
-def get_genome_url(taxid, rs_dict, mode, n):
+def get_genome_url(taxid, rs_dict, mode, nb):
     '''This function returns a list of urls to download
     '''
     try:
@@ -85,26 +85,28 @@ def get_genome_url(taxid, rs_dict, mode, n):
             elif mode in ['n', 'all']:
                 ftp_root_path = entry['ftp_path']
                 ftp_path = os.path.join(ftp_root_path, f"{Path(ftp_root_path).name}_genomic.fna.gz")
-                ret.append(
+                ret.append(tuple([
                     entry['organism_name'].lower().replace(" ","_"), 
                     taxid,
                     ftp_path
+                    ])
                 )
-        if mode == 'n' and n and n <= len(ftp_path):
-            ret = random.sample(ret, n-1)
+        if mode == 'n' and nb and nb <= len(ftp_path):
+            ret = random.sample(ret, nb)
         return rep_ret + ret
 
 
-def get_genome_urls(rs_dict, taxids):
+def get_genome_urls(rs_dict, taxids, mode, nb):
     '''This function returns a list of urls to download
     '''
-    get_genome_url_partial = partial(get_genome_url, rs_dict = rs_dict)
+    get_genome_url_partial = partial(get_genome_url, rs_dict = rs_dict, mode = mode, nb = nb)
     urls = thread_map(get_genome_url_partial, taxids)
     urls = [entry for taxid in urls for entry in taxid]
+    pprint(urls)
     return urls
 
-def main(refseq_summary_file, taxid_list_file, how, nb, outdir):
+def main(refseq_summary_file, taxid_list_file, mode, nb, outdir):
     rss = parse_refseq_summary(refseq_summary_file)
     taxids = parse_species_taxid_list(taxid_list_file)
-    entries = get_genome_urls(rss, taxids)
+    entries = get_genome_urls(rss, taxids, mode, nb)
     download_files(entries, outdir)

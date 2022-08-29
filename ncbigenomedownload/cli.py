@@ -5,21 +5,23 @@ def _get_args():
     '''This function parses and return arguments passed in'''
     parser = argparse.ArgumentParser(
         prog='ncbiGenomeDownload',
-        description='Download genomes from NCBI REFSEQ')
+        description='Download genomes from NCBI REFSEQ',
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument(
         'species_taxid_list', help="path to species taxid list file. One species taxid per line")
     parser.add_argument(
-        '-h',
-        dest='how',
+        '-m',
+        dest='mode',
         choices=['representative', 'n', 'all'],
         default="representative",
-        description="How to retrieve reference genones. Only representative, N randonly subsampled genones, or all"
+        help="Method to retrieve reference genones. Only representative, N randonly subsampled genones, or all"
     )
     parser.add_argument(
         '-n',
         dest='n',
+        type=int,
         default=None,
-        description='Number of genomes to download if -h n'
+        help='Number of genomes to download if --mode n'
     )
     parser.add_argument(
         '-r',
@@ -38,13 +40,13 @@ def _get_args():
 
     taxids = args.species_taxid_list
     refseq = args.refseq
-    how = args.how
+    mode = args.mode
     nb = args.n
     outpath = args.outpath
 
-    return(taxids, refseq, how, nb, outpath) 
+    return(taxids, refseq, mode, nb, outpath) 
 
 
 def cli():
-    TAXIDS, REFSEQ, HOW, NB, OUTPATH = _get_args()
-    main(REFSEQ, TAXIDS, HOW, NB, OUTPATH)
+    TAXIDS, REFSEQ, MODE, NB, OUTPATH = _get_args()
+    main(REFSEQ, TAXIDS, MODE, NB, OUTPATH)
