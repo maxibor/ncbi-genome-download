@@ -8,7 +8,17 @@ def _get_args():
         description='Download genomes from NCBI REFSEQ',
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument(
-        'species_taxid_list', help="path to species taxid list file. One species taxid per line")
+        '-t',
+        dest='taxid', 
+        default=None,
+        help="path to species taxid list file. One species taxid per line"
+        )
+    parser.add_argument(
+        '-a',
+        dest='accession', 
+        default=None,
+        help="path to genome accession list file. One genome accession per line"
+        )
     parser.add_argument(
         '-m',
         dest='mode',
@@ -38,15 +48,16 @@ def _get_args():
 
     args = parser.parse_args()
 
-    taxids = args.species_taxid_list
+    taxids = args.taxid
+    accs = args.accession
     refseq = args.refseq
     mode = args.mode
     nb = args.n
     outpath = args.outpath
 
-    return(taxids, refseq, mode, nb, outpath) 
+    return(taxids, accs, refseq, mode, nb, outpath) 
 
 
 def cli():
-    TAXIDS, REFSEQ, MODE, NB, OUTPATH = _get_args()
-    main(REFSEQ, TAXIDS, MODE, NB, OUTPATH)
+    TAXIDS, ACCS, REFSEQ, MODE, NB, OUTPATH = _get_args()
+    main(REFSEQ, TAXIDS, ACCS, MODE, NB, OUTPATH)

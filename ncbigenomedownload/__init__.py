@@ -41,6 +41,7 @@ def parse_refseq_summary(rs_ass_sum):
     '''This function parses the assembly_summary_refseq.txt 
     '''
     rs_dict = dict()
+    rs_acc_dict = dict()
     with open(rs_ass_sum, 'r') as csv_file:
         reader = csv.DictReader(
             filter(lambda row: row[0]!='#', csv_file), 
@@ -52,7 +53,10 @@ def parse_refseq_summary(rs_ass_sum):
                 rs_dict[row['species_taxid']] = [row]
             else :
                 rs_dict[row['species_taxid']].append(row)
-    return rs_dict
+
+            if row['assembly_accession'] not in rs_acc_dict:
+                rs_acc_dict[row['assembly_accession']] = row
+    return rs_dict, rs_acc_dict
 
 def get_genome_url(taxid, rs_dict, mode, nb):
     '''This function returns a list of urls to download
@@ -95,6 +99,29 @@ def get_genome_url(taxid, rs_dict, mode, nb):
             ret = random.sample(ret, nb)
         return rep_ret + ret
 
+def get_url_from_acc(acc, accession_dict):
+    """
+    Get entry from genome accessions:
+    
+    Args:
+        acc(str): genome_accessions
+        accession_dict(dict): refseq summary dict with accession as key
+    Returns:
+        tuple([str, str, str]): specname, taxid, url
+    """
+    
+    try:
+        specname = accession_dict[acc]['organism_name'].lower().replace(" ","_")
+        taxid = accession_dict[acc]['species_taxid']
+        url = accession_dict[acc]['ftp_path']
+        url = os.path.join(url, f"{Path(url).name}_genomic.fna.gz")
+
+        return(tuple([specname, taxid, url]))
+    except KeyError:
+        print(f"Error with accession {acc}")
+        pass
+
+
 
 def get_genome_urls(rs_dict, taxids, mode, nb):
     '''This function returns a list of urls to download
@@ -105,8 +132,21 @@ def get_genome_urls(rs_dict, taxids, mode, nb):
     pprint(urls)
     return urls
 
-def main(refseq_summary_file, taxid_list_file, mode, nb, outdir):
-    rss = parse_refseq_summary(refseq_summary_file)
-    taxids = parse_species_taxid_list(taxid_list_file)
-    entries = get_genome_urls(rss, taxids, mode, nb)
+def read_acc_list(acc_list_file):
+    acc_list = []
+    with open(acc_list_file, 'r') as f:
+        for line in f:
+            acc_list.append(line.rstrip())
+
+    return acc_list
+
+
+def main(refseq_summary_file, taxid_list_file, acc_list_file, mode, nb, outdir):
+    rss, rss_acc = parse_refseq_summary(refseq_summary_file)
+    if acc_list_file:
+        acc_list = read_acc_list(acc_list_file)
+        entries = [get_url_from_acc(acc = acc, accession_dict=rss_acc) for acc in acc_list]
+    else:
+        taxids = parse_species_taxid_list(taxid_list_file)
+        entries = get_genome_urls(rss, taxids, mode, nb)
     download_files(entries, outdir)
