@@ -4,8 +4,8 @@ from ncbigenomedownload  import main, __version__
 def _get_args():
     '''This function parses and return arguments passed in'''
     parser = argparse.ArgumentParser(
-        prog='ncbiGenomeDownload',
-        description='Download genomes from NCBI REFSEQ',
+        prog=f'ncbiGenomeDownload v{__version__}',
+        description='Download genomes from NCBI Assembly databases (RefSeq/Genbank)',
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument(
         '-t',
@@ -36,28 +36,32 @@ def _get_args():
     parser.add_argument(
         '-r',
         dest="refseq",
-        default="assembly_summary_refseq.txt",
         help="path to assembly_summary_refseq.txt")
+    parser.add_argument(
+        '-g',
+        dest="genbank",
+        help="path to assembly_summary_genbank.txt")
     parser.add_argument(
         '-o',
         dest="outpath",
         default=".",
         help="path to existing output directory")
     parser.add_argument('--version', action='version',
-                    version=f"sam2lca v{__version__}")
+                    version=f"ncbigenomedownload v{__version__}")
 
     args = parser.parse_args()
 
     taxids = args.taxid
     accs = args.accession
     refseq = args.refseq
+    genbank = args.genbank
     mode = args.mode
     nb = args.n
     outpath = args.outpath
 
-    return(taxids, accs, refseq, mode, nb, outpath) 
+    return(taxids, accs, refseq, genbank, mode, nb, outpath) 
 
 
 def cli():
-    TAXIDS, ACCS, REFSEQ, MODE, NB, OUTPATH = _get_args()
-    main(REFSEQ, TAXIDS, ACCS, MODE, NB, OUTPATH)
+    TAXIDS, ACCS, REFSEQ, GENBANK, MODE, NB, OUTPATH = _get_args()
+    main(TAXIDS, ACCS, MODE, NB, OUTPATH, rs_summary_file=REFSEQ, gb_summary_file=GENBANK)

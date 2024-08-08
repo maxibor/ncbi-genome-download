@@ -1,7 +1,7 @@
 import os
 import csv
 from pathlib import Path
-from ncbigenomedownload.fieldnames import fieldnames
+from ncbigenomedownload.fieldnames import refseq_fieldnames, genbank_fieldnames
 from pprint import pprint
 from tqdm.contrib.concurrent import thread_map
 from functools import partial
@@ -12,7 +12,7 @@ import time
 import random
 
 
-__version__ = "0.2"
+__version__ = "0.3"
 
 def download_file(entry, outdir):
     os.makedirs(outdir, exist_ok=True)
@@ -37,12 +37,12 @@ def parse_species_taxid_list(taxid_list_file):
             taxids.append(line.strip())
     return taxids
 
-def parse_refseq_summary(rs_ass_sum):
+def parse_summary(ass_sum, fieldnames):
     '''This function parses the assembly_summary_refseq.txt 
     '''
     rs_dict = dict()
     rs_acc_dict = dict()
-    with open(rs_ass_sum, 'r') as csv_file:
+    with open(ass_sum, 'r') as csv_file:
         reader = csv.DictReader(
             filter(lambda row: row[0]!='#', csv_file), 
             fieldnames=fieldnames, 
@@ -141,8 +141,17 @@ def read_acc_list(acc_list_file):
     return acc_list
 
 
-def main(refseq_summary_file, taxid_list_file, acc_list_file, mode, nb, outdir):
-    rss, rss_acc = parse_refseq_summary(refseq_summary_file)
+def main(taxid_list_file, acc_list_file, mode, nb, outdir, rs_summary_file=None, gb_summary_file=None):
+    print(rs_summary_file, gb_summary_file)
+    if rs_summary_file:
+        summary_file = rs_summary_file
+        fieldnames = refseq_fieldnames
+    elif gb_summary_file:
+        summary_file = gb_summary_file
+        fieldnames = genbank_fieldnames
+    else:
+        raise ValueError("You must provide either a refseq or genbank summary file")
+    rss, rss_acc = parse_summary(summary_file, fieldnames)
     if acc_list_file:
         acc_list = read_acc_list(acc_list_file)
         entries = [get_url_from_acc(acc = acc, accession_dict=rss_acc) for acc in acc_list]
